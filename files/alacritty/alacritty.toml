@@ -1,0 +1,52 @@
+general.import = ["~/.config/alacritty/themes/themes/solarized_dark.toml"]
+
+[colors.bright]
+# Overriding black color which is the same as background color
+# Sometimes, loggers use this color for timestamps...
+black = "#626262"
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 13
+
+# Font location ~/.local/share/fonts
+# Reload cache: fc-cache -f -v
+# Look up font: fc-list
+[font.bold]
+family = "CommitMono Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "CommitMono Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "CommitMono Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "CommitMono Nerd Font Mono"
+style = "Regular"
+
+[cursor.style]
+blinking = "Never"
+
+[scrolling]
+history = 100000
+
+[window]
+dynamic_title = true
+
+[window.class]
+general = "Alacritty"
+instance = "Alacritty"
+
+[keyboard]
+bindings = [
+  # { key = ";", mods = "Control", chars = "\u001f" }
+  { key = "Slash", mods = "Control", chars = "\u001f" },
+  { key = ">", mods = "Control", chars = "\u001f" },
+  { key = "<", mods = "Control", chars = "\u001f" },
+]

@@ -1,0 +1,29 @@
+[user]
+  email = nmaupu@gmail.com
+  name = Nicolas Maupu
+
+[includeIf "gitdir:~/work/perso/**"]
+  path = ~/.gitconfig-perso
+
+[includeIf "gitdir:~/.dotfiles"]
+  path = ~/.gitconfig-perso
+
+[includeIf "gitdir:~/work/pro/**"]
+  path = ~/.gitconfig-pro
+
+[safe]
+  directory = ~/work/perso/nix-config
+
+[merge]
+  tool = meld
+  conflictStyle = diff3
+
+[mergetool]
+  # Do not prompt to confirm opening each conflicting file
+  prompt = false
+  # Do not keep the .orig backup files after a successful merge
+  keepBackup = false
+
+[mergetool "meld"]
+  # Tell Git to trust Meld's exit code to determine if the merge succeeded
+  trustExitCode = true

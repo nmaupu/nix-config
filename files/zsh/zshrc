@@ -1,0 +1,139 @@
+# Powerlevel10k is configured using ~/.p10k.zsh
+
+# History
+export HISTFILE=$HOME/.zsh_history
+export HISTSIZE=100000
+export SAVEHIST=100000
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+
+export EDITOR=nvim
+
+# Do not sighup background jobs
+setopt NO_HUP
+setopt NO_CHECK_JOBS
+
+# Enable bash comment style with dash character
+setopt interactivecomments
+
+# Misc bindings
+bindkey "^[Oc" forward-word
+bindkey "^[Od" backward-word
+bindkey "\^U"  backward-kill-line
+bindkey "^[m"  copy-earlier-word
+
+if [ -f ~/.ssh/config ]; then
+  h=()
+  h=($h ${${${(@M)${(f)"$(cat ~/.ssh/config*)"}:#Host *}#Host }:#*[*? ]*})
+  if [[ $#h -gt 0 ]]; then
+    zstyle ':completion:*:ssh:*' hosts $h
+    zstyle ':completion:*:scp:*' hosts $h
+    zstyle ':completion:*:rsync:*' hosts $h
+    zstyle ':completion:*:slogin:*' hosts $h
+    zstyle ':completion:*:pssh:*' hosts $h
+    zstyle ':completion:*:cssh:*' hosts $h
+  fi
+fi
+
+# compinit is run by home-manager (programs.zsh.enableCompletion)
+
+# Plugins and themes: loaded by home-manager (programs.antidote), see modules/home/shells.nix
+
+
+# FZF config
+_gen_fzf_default_opts() {
+  local base03="234"
+  local base02="235"
+  local base01="240"
+  local base00="241"
+  local base0="244"
+  local base1="245"
+  local base2="254"
+  local base3="230"
+  local yellow="136"
+  local orange="166"
+  local red="160"
+  local magenta="125"
+  local violet="61"
+  local blue="33"
+  local cyan="37"
+  local green="64"
+
+  # Solarized Dark color scheme for fzf
+  export FZF_DEFAULT_OPTS="
+    --no-height --border --exact
+    --color fg:-1,bg:-1,hl:$blue,fg+:$base2,bg+:$base02,hl+:$blue
+    --color info:$yellow,prompt:$yellow,pointer:$base3,marker:$base3,spinner:$yellow
+  "
+
+}
+_gen_fzf_default_opts
+source <(fzf --zsh)
+
+# Custom aliases
+alias test_term_colors="wget -O - https://raw.githubusercontent.com/robertknight/konsole/master/tests/color-spaces.pl | perl; \
+  curl -s https://raw.githubusercontent.com/JohnMorales/dotfiles/master/colors/24-bit-color.sh | bash"
+alias vim="nvim"
+alias vi="nvim"
+alias s="nvim + ~/.scratchpad"
+alias history="fc -il 1"
+alias emacs="$HOME/.local/bin/doom-emacs"
+alias doom="$HOME/.config/emacs/bin/doom"
+alias k="kubectl"
+alias us="xkbcomp -I$XDG_CONFIG_HOME/xkb $XDG_CONFIG_HOME/xkb/qwertyfr.xkb $DISPLAY 2>/dev/null; xmodmap -e 'keysym Escape = Escape asciitilde Escape'"
+
+# Kubernetes - change context
+kcs() {
+  local new_context
+  if [ "$1" = '-' ]; then
+    new_context = '-'
+  else
+    new_context=$(kubectl config get-contexts -o=name | fzf -0 -1 --tac -q "${1:-""}")
+  fi
+
+  kubectl config use-context "${new_context}";
+  rm -f "${ZDOTDIR:-$HOME}/.kube/conf.d/gke_gcloud_auth_plugin_cache"
+}
+
+# Kubernetes - change current namespace
+kns() {
+  local new_context
+  if [ "$1" = '-' ]; then
+    new_ns = '-'
+  else
+    new_ns=$(kubectl get ns | awk 'NR>2{print $1}'| fzf -0 -1 --tac)
+  fi
+
+  kubectl config set-context $(kubectl config current-context) --namespace="${new_ns}"
+}
+
+# Custom and private configs
+if [ -d "${ZDOTDIR:-$HOME}/.zshrc.d" ]; then
+  find "${ZDOTDIR:-$HOME}/.zshrc.d" -type f | while read -r file; do
+    source "${file}"
+  done
+fi
+
+# kube configs
+# Rebuilt from scratch (not appended to the inherited value) so nested shells
+# don't accumulate duplicates or keep files that have since been deleted:
+# kubectl ignores missing files but kube-rs based tools (kubectl-view-allocations) fail.
+if [ -d "$HOME/.kube/conf.d" ]; then
+  # Keep find's order: kubectl takes current-context from the first file setting it
+  export KUBECONFIG="$(find "$HOME/.kube/conf.d" -type f | paste -sd:)"
+fi
+
+# Autosuggestions default color is the same as the background color...
+# Changing it to dark gray
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=10'
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+[[ ! -f "${ZDOTDIR:-$HOME}/.p10k.zsh" ]] || . "${ZDOTDIR:-$HOME}/.p10k.zsh"
+
+# gcloud shell integration and other work-only bits are appended by
+# modules/home/work.nix when nmaupu.work.enable = true.
