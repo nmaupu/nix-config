@@ -1,31 +1,42 @@
 # Disk layout, same scheme as the Guix install (see README):
 #
-#   /dev/nvme0n1p1  512M  vfat   /boot (ESP)
-#   /dev/nvme0n1p2  rest  LUKS2  -> crypt-root -> LVM VG "sys"
-#     sys-root    20G    ext4  /               (Guix: 12G; /var/lib/libvirt and /tmp live here)
-#     sys-nix     200G   ext4  /nix            (replaces gnustore 140G + nixstore 50G)
-#     sys-docker  100G   xfs   /var/lib/docker
-#     sys-log     10G    xfs   /var/log
-#     sys-swap    32G    swap  (+ hibernation)
-#     sys-home    350G   xfs   /home
+#   p1  1G    vfat   /boot (ESP, holds kernels+initrds for systemd-boot)  partlabel disk-main-ESP
+#   p2  rest  LUKS2  -> crypt-nixos      partlabel disk-main-luks
+#                    -> LVM VG "nixos"   (named differently from the Guix "sys"
+#                       VG / "crypt-root" so both disks can coexist on one machine)
+#     nixos-root    20G    ext4  /               (Guix: 12G; /var/lib/libvirt and /tmp live here)
+#     nixos-nix     200G   ext4  /nix            (replaces gnustore 140G + nixstore 50G)
+#     nixos-docker  100G   xfs   /var/lib/docker
+#     nixos-log     10G    xfs   /var/log
+#     nixos-swap    32G    swap  (+ hibernation)
+#     nixos-home    350G   xfs   /home
 #     ~240G left unallocated in the VG, like on Guix (lvextend later if needed)
 #
 # !!! `disko --mode destroy,format,mount` WIPES THE DISK. Never run it on an
-# !!! installed system. For a fresh install only (see README).
+# !!! installed system. For a fresh install only (see docs/MIGRATION.md).
+#
+# The target disk is a parameter so the same file serves the USB-adapter case:
+#   disko --mode destroy,format,mount --argstr device /dev/sdX ./hosts/nmaupu-laptop/disko.nix
+# At boot nothing depends on the device name: disko refers to partitions by
+# partlabel and LVs by VG/LV name.
 #
 # Besides partitioning, this module makes NixOS mount these filesystems
 # (fileSystems.*, swapDevices, boot.initrd.luks.devices) so hardware.nix
 # does not have to repeat them.
 {
+  device ? "/dev/nvme0n1",
+  ...
+}:
+{
   disko.devices = {
     disk.main = {
       type = "disk";
-      device = "/dev/nvme0n1";
+      inherit device;
       content = {
         type = "gpt";
         partitions = {
           ESP = {
-            size = "512M";
+            size = "1G"; # ~8 generations of kernel+initrd
             type = "EF00";
             content = {
               type = "filesystem";
@@ -38,13 +49,13 @@
             size = "100%";
             content = {
               type = "luks";
-              name = "crypt-root";
+              name = "crypt-nixos";
               settings.allowDiscards = true;
               # Interactive passphrase prompt at install time
               askPassword = true;
               content = {
                 type = "lvm_pv";
-                vg = "sys";
+                vg = "nixos";
               };
             };
           };
@@ -52,7 +63,7 @@
       };
     };
 
-    lvm_vg.sys = {
+    lvm_vg.nixos = {
       type = "lvm_vg";
       lvs = {
         root = {

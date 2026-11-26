@@ -34,14 +34,14 @@ Work tools are enabled per host with `nmaupu.work.enable = true` in
 Disk layout (same as Guix, minus the Guix store):
 
 ```
-/dev/nvme0n1p1  512M  vfat   /boot  (ESP)
-/dev/nvme0n1p2  rest  LUKS2  crypt-root -> LVM VG "sys"
-  sys-root    20G    ext4  /
-  sys-nix     200G   ext4  /nix
-  sys-docker  100G   xfs   /var/lib/docker
-  sys-log     10G    xfs   /var/log
-  sys-swap    32G    swap  (hibernation)
-  sys-home    350G   xfs   /home
+p1  1G    vfat   /boot  (ESP, kernels + initrds: no separate /boot with systemd-boot)
+p2  rest  LUKS2  crypt-nixos -> LVM VG "nixos"
+  nixos-root    20G    ext4  /
+  nixos-nix     200G   ext4  /nix
+  nixos-docker  100G   xfs   /var/lib/docker
+  nixos-log     10G    xfs   /var/log
+  nixos-swap    32G    swap  (hibernation)
+  nixos-home    350G   xfs   /home
   (rest of the VG left unallocated, as on Guix)
 ```
 
@@ -52,6 +52,11 @@ Differences with Guix, on purpose:
   the initrd, and LUKS2 can use its default argon2id (Guix needed `--pbkdf
   pbkdf2` for GRUB).
 - `/nix` is one LV (Guix had `/gnu/store` + `/nix/store`).
+- VG is `nixos` and the LUKS mapping `crypt-nixos` (Guix: `sys` / `crypt-root`)
+  so the two disks can be plugged in the same machine without name clashes.
+
+Migrating from the Guix laptop with the new disk on a USB adapter:
+see [docs/MIGRATION.md](docs/MIGRATION.md).
 
 1. Boot the NixOS minimal ISO, get network (`sudo systemctl start wpa_supplicant`
    + `wpa_cli`, or ethernet).
@@ -73,10 +78,14 @@ Differences with Guix, on purpose:
 
    disko asks for the LUKS passphrase. Everything ends up mounted under `/mnt`.
 
-   If you prefer partitioning by hand (cfdisk/cryptsetup/lvcreate like the Guix
-   README), keep the device names above (`crypt-root`, VG `sys`, LV names) and
-   use `disko --mode mount --flake .#nmaupu-laptop` to mount, or mount manually
-   under `/mnt`, `/mnt/boot`, `/mnt/nix`, ...
+   If the disk is not `/dev/nvme0n1` (USB adapter), pass the file instead of the flake:
+
+   ```bash
+   nix run github:nix-community/disko/latest -- --mode destroy,format,mount \
+     --argstr device /dev/sdX ./hosts/nmaupu-laptop/disko.nix
+   ```
+
+   To only mount an already formatted disk: `--mode mount`.
 
 4. Install:
 

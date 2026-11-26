@@ -1,0 +1,39 @@
+# rsync exclude list for migrating /home/nmaupu from the Guix laptop.
+# Patterns are relative to $HOME. Used by migration/sync-home.sh, which also
+# appends every symlink pointing into /gnu/store or ~/.guix-* (home-manager
+# recreates those targets).
+
+## Guix itself
+/.guix-home
+/.guix-profile
+/.guix-extra-profiles
+/.config/guix
+/.cache/guix
+/.config/shepherd
+/.local/var/log
+/.bin
+/.dotfiles
+/.config/alsa
+/.local/share/guix-sandbox-home
+
+## Recreated by home-manager / reinstalled on NixOS
+/.npm-global
+/.local/goenv
+/.tmux/plugins/tpm
+/.pi/agent/mcp.json
+/.pi/agent/extensions
+/.pi/agent/agents
+/.pi/agent/prompts
+/.pi/agent/skills
+/.pi-lens
+/.var
+/.local/share/flatpak
+
+## Caches and logs (regenerated)
+/.cache
+/.npm
+/.xsession.log
+/.xsession.err
+/.local/share/Trash
+/go/pkg/mod/cache
+/.cache/go-build

@@ -35,7 +35,7 @@
     kernelModules = [ "kvm-intel" ];
     extraModulePackages = [ ];
 
-    # boot.resumeDevice (hibernation) is set by disko from the swap LV (disko.nix)
+    # boot.resumeDevice (hibernation) is set by disko from the swap LV (/dev/nixos/swap)
 
     loader = {
       # systemd-boot with the ESP on /boot. Guix used GRUB with /boot on the
