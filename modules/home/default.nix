@@ -12,6 +12,7 @@
     ./k8s.nix
     ./pi.nix
     ./work.nix
+    ./scripts.nix
   ];
 
   home = {

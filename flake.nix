@@ -40,7 +40,6 @@
           modules = [
             { nixpkgs.overlays = overlays; }
             disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
             ./hosts/${hostname}
           ];
         };
@@ -48,6 +47,20 @@
     {
       nixosConfigurations = {
         nmaupu-laptop = mkHost "nmaupu-laptop";
+      };
+
+      # User config, applied on its own with `update-home` (not part of the
+      # NixOS system: no home-manager NixOS module).
+      homeConfigurations."nmaupu@nmaupu-laptop" = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          inherit system overlays;
+          config.allowUnfree = true;
+        };
+        extraSpecialArgs = { inherit inputs; };
+        modules = [
+          ./modules/home
+          { nmaupu.work.enable = true; }
+        ];
       };
 
       # Expose custom packages: `nix build .#polybar-themes`

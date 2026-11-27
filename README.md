@@ -5,7 +5,7 @@ NixOS + Home Manager configuration (flake), ported from the Guix setup in
 
 ```
 flake.nix                 inputs (nixpkgs unstable, home-manager, disko, nixos-hardware), hosts
-hosts/nmaupu-laptop/      host: hardware, disk layout (disko), home-manager wiring
+hosts/nmaupu-laptop/      host: hardware, disk layout (disko)
 modules/nixos/            system: base, desktop (X11/SDDM/xmonad), audio, services, virtualisation, 1password
 modules/home/             user: base, shells, git, tmux, wm, emacs, dev, k8s, pi, work (toggle)
 pkgs/                     packages missing from nixpkgs (overlay)
@@ -14,20 +14,29 @@ files/                    dotfiles linked by home-manager
 
 ## Day to day
 
+System (NixOS) and user (home-manager) are applied separately, like the old
+Guix `update-system` / `update-home`. Scripts come from `modules/home/scripts.nix`:
+
 ```bash
-# system + home in one go (replaces update-system / update-home)
-sudo nixos-rebuild switch --flake ~/work/perso/nix-config#nmaupu-laptop
-
-# update inputs (replaces update-channels)
-nix flake update ~/work/perso/nix-config
-
-# check without switching
-nix flake check ~/work/perso/nix-config
-nixos-rebuild build --flake ~/work/perso/nix-config#nmaupu-laptop
+update-nix       # nix flake update: bump flake.lock only, applies nothing (was update-channels)
+update-system    # sudo nixos-rebuild switch --flake .#$(hostname), then package diff (nvd)
+update-home      # home-manager switch --flake .#$USER@$(hostname), then package diff
+update-system --home  # system, then home in one go
+update-system --dry   # build only (same for update-home, also works with --home)
 ```
 
+Extra arguments go to the underlying command (`update-system --show-trace`).
+The repo is expected in `~/work/perso/nix-config` (override with `NIX_CONFIG_DIR`).
+
+Notes:
+
+- Flakes only see git-tracked files: `git add` new files before rebuilding.
+- `xmonad.hs` changes: `update-home`, then `mod+q` to recompile.
+- `.xsession` changes (modules/home/wm.nix): `update-home`, then log out/in.
+- Check without switching: `nix flake check`.
+
 Work tools are enabled per host with `nmaupu.work.enable = true` in
-`hosts/<host>/default.nix`.
+the `homeConfigurations` entry of `flake.nix`.
 
 ## Fresh install
 
@@ -95,10 +104,15 @@ see [docs/MIGRATION.md](docs/MIGRATION.md).
    reboot
    ```
 
-5. After first login (SDDM session "home-manager"):
+5. User config is not part of `nixos-install`: log in on a TTY (ctrl-alt-F2)
+   and apply it once (afterwards `update-home` does it), then log in through
+   SDDM (session "home-manager", it runs `~/.xsession`):
 
    ```bash
-   git clone git@github.com:nmaupu/nix-config.git ~/work/perso/nix-config
+   git clone https://github.com/nmaupu/nix-config ~/work/perso/nix-config
+   cd ~/work/perso/nix-config
+   nix run home-manager -- switch -b hm-bak --flake .#nmaupu@nmaupu-laptop
+   # then, once logged in:
    # pi is an npm install (prefix ~/.npm-global is set by ~/.npmrc)
    npm install -g @earendil-works/pi-coding-agent
    # first run clones doom + config, ~5 min
@@ -117,6 +131,6 @@ see [docs/MIGRATION.md](docs/MIGRATION.md).
   substituters / `netrc-file`.
 - xmonad is provided by the NixOS module (ghc + xmonad-contrib on PATH), so
   `mod+q` recompiles `~/.config/xmonad/xmonad.hs` as before. The file is a
-  read-only link to this repo: edit it here, then `nixos-rebuild switch`.
+  read-only link to this repo: edit it here, then `update-home`.
 - `~/.pi/agent/settings.json` gets the pi package list merged in at activation
   (`modules/home/pi.nix`), pi installs them on next startup.
