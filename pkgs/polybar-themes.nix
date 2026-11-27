@@ -13,8 +13,8 @@ stdenvNoCC.mkDerivation {
   src = fetchFromGitHub {
     owner = "nmaupu";
     repo = "polybar-themes";
-    rev = "5f022cf05147e0a609140391aef71665f8658b2b";
-    hash = "sha256-3OVC+TwGCmKvZ2ScLDRGaH4u1noOxG4rK/GG53L+VSU=";
+    rev = "058cfb5d2ee3f5be54410bff5648eba65d615cf9";
+    hash = "sha256-PhqWVflkZlv7I5VLynNGKDQOWZ1tZ5InLLZbLUzf5E0=";
   };
 
   dontBuild = true;
