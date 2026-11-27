@@ -15,11 +15,9 @@
       ];
       substituters = [
         "https://cache.nixos.org"
-        "https://cachix-backend-go.cachix.org"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "cachix-backend-go.cachix.org-1:ry/FeJ1OA9ZhPJC05jx06PQQmNvVZIcMAYghGfia+0o="
       ];
       auto-optimise-store = true;
     };

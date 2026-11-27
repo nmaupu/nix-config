@@ -17,6 +17,13 @@
     };
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    # Prebuilt weekly nix-index database: `nix-locate` (guix locate) and
+    # `,` (comma) without running nix-index locally.
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -58,6 +65,7 @@
         };
         extraSpecialArgs = { inherit inputs; };
         modules = [
+          inputs.nix-index-database.homeModules.nix-index
           ./modules/home
           { nmaupu.work.enable = true; }
         ];
