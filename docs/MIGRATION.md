@@ -7,8 +7,16 @@ swap the disks.
 Names on the new disk never clash with the running system (`crypt-nixos` /
 VG `nixos` vs Guix's `crypt-root` / `sys`), so both can be plugged at once.
 
-Everything below is run from the Guix laptop. `$NC` is this repo
-(`~/work/perso/nix-config`), `$DISK` the adapter disk.
+Everything below is run from the Guix laptop, in one shell, with two
+variables set:
+
+```bash
+export NC=$HOME/work/perso/nix-config   # this repo
+export DISK=/dev/sdb                    # the new NVMe on the USB adapter, see step 0
+```
+
+(`sudo` keeps them in the examples below because they are expanded by your
+shell before `sudo` runs.)
 
 ## 0. Identify the disk
 
@@ -17,10 +25,10 @@ lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,MODEL,TRAN
 ```
 
 The USB stick with the Guix ISO is `sda`; the new NVMe will show up as
-`sdb` (or similar) with `TRAN=usb` and the right size. **Double check**:
+`sdb` (or similar) with `TRAN=usb` and the right size. **Double check**
+before anything destructive:
 
 ```bash
-export DISK=/dev/sdb
 lsblk $DISK
 ```
 
@@ -66,9 +74,9 @@ sudo lvcreate -L350G -n home   nixos
 sudo mkfs.vfat -F32 -n ESP /dev/disk/by-partlabel/disk-main-ESP
 sudo mkfs.ext4 -L root /dev/nixos/root
 sudo mkfs.ext4 -L nix  /dev/nixos/nix
-sudo mkfs.xfs  -L docker /dev/nixos/docker
-sudo mkfs.xfs  -L log  /dev/nixos/log
-sudo mkfs.xfs  -L home /dev/nixos/home
+sudo mkfs.ext4 -L docker /dev/nixos/docker
+sudo mkfs.ext4 -L log  /dev/nixos/log
+sudo mkfs.ext4 -L home /dev/nixos/home
 sudo mkswap    -L swap /dev/nixos/swap
 
 # Mount

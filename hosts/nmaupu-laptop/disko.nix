@@ -6,10 +6,10 @@
 #                       VG / "crypt-root" so both disks can coexist on one machine)
 #     nixos-root    20G    ext4  /               (Guix: 12G; /var/lib/libvirt and /tmp live here)
 #     nixos-nix     200G   ext4  /nix            (replaces gnustore 140G + nixstore 50G)
-#     nixos-docker  100G   xfs   /var/lib/docker
-#     nixos-log     10G    xfs   /var/log
+#     nixos-docker  100G   ext4  /var/lib/docker
+#     nixos-log     10G    ext4  /var/log
 #     nixos-swap    32G    swap  (+ hibernation)
-#     nixos-home    350G   xfs   /home
+#     nixos-home    350G   ext4  /home
 #     ~240G left unallocated in the VG, like on Guix (lvextend later if needed)
 #
 # !!! `disko --mode destroy,format,mount` WIPES THE DISK. Never run it on an
@@ -67,7 +67,7 @@
       type = "lvm_vg";
       lvs = {
         root = {
-          size = "20G";
+          size = "30G";
           content = {
             type = "filesystem";
             format = "ext4";
@@ -87,7 +87,7 @@
           size = "100G";
           content = {
             type = "filesystem";
-            format = "xfs";
+            format = "ext4";
             mountpoint = "/var/lib/docker";
           };
         };
@@ -95,7 +95,7 @@
           size = "10G";
           content = {
             type = "filesystem";
-            format = "xfs";
+            format = "ext4";
             mountpoint = "/var/log";
           };
         };
@@ -110,7 +110,7 @@
           size = "350G";
           content = {
             type = "filesystem";
-            format = "xfs";
+            format = "ext4";
             mountpoint = "/home";
           };
         };

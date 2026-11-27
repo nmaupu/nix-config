@@ -38,10 +38,10 @@ p1  1G    vfat   /boot  (ESP, kernels + initrds: no separate /boot with systemd-
 p2  rest  LUKS2  crypt-nixos -> LVM VG "nixos"
   nixos-root    20G    ext4  /
   nixos-nix     200G   ext4  /nix
-  nixos-docker  100G   xfs   /var/lib/docker
-  nixos-log     10G    xfs   /var/log
+  nixos-docker  100G   ext4  /var/lib/docker
+  nixos-log     10G    ext4  /var/log
   nixos-swap    32G    swap  (hibernation)
-  nixos-home    350G   xfs   /home
+  nixos-home    350G   ext4  /home
   (rest of the VG left unallocated, as on Guix)
 ```
 
