@@ -43,6 +43,12 @@
     zoom-us
   ];
 
+  # guix locate -> `nix-locate bin/foo`; `, foo` runs foo without installing it.
+  # Database comes prebuilt from the nix-index-database flake input (module
+  # imported in flake.nix). Also installs zsh's command-not-found handler.
+  programs.nix-index.enable = true;
+  programs.nix-index-database.comma.enable = true;
+
   # ~/.config/xkb/qwertyfr.xkb is loaded from ~/.xsession with
   #   xkbcomp -I$XDG_CONFIG_HOME/xkb $XDG_CONFIG_HOME/xkb/qwertyfr.xkb $DISPLAY
   xdg.configFile = {

@@ -34,6 +34,10 @@ Notes:
 - `xmonad.hs` changes: `update-home`, then `mod+q` to recompile.
 - `.xsession` changes (modules/home/wm.nix): `update-home`, then log out/in.
 - Check without switching: `nix flake check`.
+- `guix locate` → `nix-locate bin/foo`, run without installing: `, foo`
+  (nix-index-database + comma, `modules/home/base.nix`).
+- Guix → Nix command cheatsheet: [docs/guix-to-nix-cheatsheet.pdf](docs/guix-to-nix-cheatsheet.pdf)
+  (source `.typ` next to it, build command in its header).
 
 Work tools are enabled per host with `nmaupu.work.enable = true` in
 the `homeConfigurations` entry of `flake.nix`.
