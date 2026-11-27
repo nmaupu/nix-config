@@ -87,6 +87,7 @@
     bluez
     brightnessctl
     exfat
+    file
     git
     gvfs
     libva-utils
