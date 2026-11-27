@@ -126,6 +126,28 @@ settings, auth), `.claude`.
 
 Ownership is rewritten to `1000:100` (NixOS `users` gid is 100, Guix's is 997).
 
+## 2b. Copy /var/lib/docker (optional, saves re-pulling ~40 GB of images)
+
+Same storage driver on both sides (overlay2), so the tree is copied verbatim:
+images, layers, build cache, the 185 volumes and the stopped containers.
+Docker 20.10 (Guix) -> 28.x (nixpkgs) reads it as is, and the `runc`
+runtime name that the Guix `daemon.json` pinned is the nixpkgs default.
+
+```bash
+# optional: shrink first (removes images not used by any container, dangling
+# volumes, build cache; 38 of the 41 GB of images are in that category)
+docker system prune            # add --volumes to drop unused volumes too
+
+sudo herd stop dockerd         # consistency: layer DB + overlay dirs
+sudo $NC/migration/sync-docker.sh /mnt/var/lib/docker        # dry run
+sudo $NC/migration/sync-docker.sh --go /mnt/var/lib/docker   # ~43 GB
+sudo herd start dockerd
+```
+
+The script refuses to run while `dockerd` is up or if the target is not a
+mountpoint. It keeps numeric uids/gids, xattrs, hard links and sparse files,
+which overlay2 relies on.
+
 ## 3. Install
 
 ### From the NixOS ISO (recommended)

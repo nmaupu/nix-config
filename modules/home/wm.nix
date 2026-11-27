@@ -15,6 +15,8 @@
     xmodmap
     xrandr
     xrdb
+    xsetroot
+    psmisc # killall, used by ~/.config/polybar/launch.sh to restart the bar
     xkbcomp
     setxkbmap
     xmessage # useful when recompiling xmonad in case of errors
@@ -63,6 +65,10 @@
       xrandr --addmode DP-1-1 "5120x1440_30.00"
       xrandr --addmode HDMI-1 "5120x1440_30.00"
       xrandr --addmode HDMI-1 "4096x1440_30.00"
+
+      # Paint the root window, otherwise the last closed window stays "ghosted"
+      # on screen (nothing redraws the empty root). Colour = colBG in xmonad.hs.
+      xsetroot -solid '#0f0f0f' -cursor_name left_ptr
 
       mkdir -p ~/.logs
 

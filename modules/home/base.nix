@@ -22,6 +22,7 @@
     python3
     python3Packages.pip
     python3Packages.requests
+    uv # python tools: `uv tool install ruff`, venvs with `uv venv` (replaces pipx)
     openvpn
     qutebrowser
     ripgrep
